@@ -6,13 +6,29 @@ body {
   color: white;
 }
 
+section {
+  display: flex;
+}
+
 #intro-name {
   position: absolute;
-  transform: translate(50%, 50%);
+  top: 5%;
+  left: 10%;
+  font-size: 3em;
+  transition: transform 1s ease-out, opacity 1s ease-out;
+}
+
+body.loaded #intro-name {
+  opacity: 1;
 }
 
 #intro-role {
   position: absolute;
+  top: 18%;
+  left: 10%;
+  color: #aaa;
+  font-size: 2em;
+  transition: transform 1s ease-out, opacity 2s ease-out;
 }
 
 #intro-name {
@@ -30,7 +46,7 @@ body {
   z-index: -1;
 }
 
-.bg.animate {
+body.loaded .bg {
   opacity: 1;
 }
 

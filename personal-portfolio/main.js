@@ -143,7 +143,12 @@ function StartAnimationEnd() {
   bg.classList.remove("animate");
 }
 
-new PortfolioApp();
+window.addEventListener('DOMContentLoaded', () => {
+  document.body.classList.add('loaded');
+  
+  new PortfolioApp();
+});
+
 
 let startButton = document.querySelector(".startbutton");
 let endButton = document.querySelector(".endbutton");
