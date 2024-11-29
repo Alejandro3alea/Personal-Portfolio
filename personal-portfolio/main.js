@@ -13,7 +13,7 @@ class PortfolioApp {
     this.newScene();
 
     this.addLighting();
-    this.loadSkybox();
+    //this.loadSkybox();
     this.loadModels();
     this.createCommonShapes();
     //this.renderDebugInfo();
@@ -22,7 +22,7 @@ class PortfolioApp {
 
   initializeRenderer() {
     this.renderer = new THREE.WebGLRenderer({
-      canvas: document.querySelector('#bg'),
+      canvas: document.querySelector('.bg'),
       antialias: true
     });
 
@@ -60,6 +60,9 @@ class PortfolioApp {
     pointLight.position.set(0, 9, 0);
     pointLight.castShadow = true;
     this.scene.add(pointLight);
+    
+    const bgLight = new THREE.AmbientLight(0xFFFFFF);
+    this.scene.add(bgLight);
   }
 
   loadSkybox() {
@@ -130,4 +133,21 @@ class PortfolioApp {
   }
 }
 
+function StartAnimationBegin() {
+  let bg = document.querySelector(".bg");
+  bg.classList.add("animate");
+}
+
+function StartAnimationEnd() {
+  let bg = document.querySelector(".bg");
+  bg.classList.remove("animate");
+}
+
 new PortfolioApp();
+
+let startButton = document.querySelector(".startbutton");
+let endButton = document.querySelector(".endbutton");
+
+//startButton.addEventListener('click', StartAnimationBegin);
+//endButton.addEventListener('click', StartAnimationEnd);
+

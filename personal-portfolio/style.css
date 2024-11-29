@@ -1,5 +1,60 @@
-canvas {
+body {
+  margin: 0; 
+  overflow: hidden;
+  font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: black;
+  color: white;
+}
+
+#intro-name {
+  position: absolute;
+  transform: translate(50%, 50%);
+}
+
+#intro-role {
+  position: absolute;
+}
+
+#intro-name {
+  position: absolute;
+}
+
+.bg {
   position: fixed;
   top: 0;
   left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition-duration: 3s;
+  z-index: -1;
+}
+
+.bg.animate {
+  opacity: 1;
+}
+
+.social-media-buttons {
+  display: flex;
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  justify-content: center;
+  gap: 10px;
+  padding: 5px;
+  border-radius: 5px;
+}
+
+.social-media-buttons a img {
+  width: 45px;
+  height: 45px;
+  object-fit: contain;
+  transition: transform 0.3s ease;
+  border-radius: 8px;
+}
+
+.social-media-buttons a img:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 8px rgb(0, 0, 0, 0.2); 
 }
