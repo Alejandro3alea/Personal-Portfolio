@@ -12,27 +12,33 @@ section {
 
 #intro-name {
   position: absolute;
-  top: 5%;
+  top: 12%;
   left: 10%;
+  transform: translate(0, -25px);
   font-size: 3em;
-  transition: transform 1s ease-out, opacity 1s ease-out;
+  opacity: 0;
+  transition: transform 1s ease-out, opacity 2s ease-out;
 }
 
 body.loaded #intro-name {
+  transform: translate(0, 0);
   opacity: 1;
 }
 
 #intro-role {
   position: absolute;
-  top: 18%;
+  top: 24%;
   left: 10%;
   color: #aaa;
   font-size: 2em;
-  transition: transform 1s ease-out, opacity 2s ease-out;
+  transform: translate(0, -25px);
+  opacity: 0;
+  transition: transform 1.15s ease-in-out, opacity 3s ease-out;
 }
 
-#intro-name {
-  position: absolute;
+body.loaded #intro-role {
+  transform: translate(0, 0);
+  opacity: 1;
 }
 
 .bg {
