@@ -6,8 +6,11 @@ body {
   color: white;
 }
 
-section {
+.flex-column {
   display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-wrap: nowrap;
 }
 
 #intro-name {
@@ -30,8 +33,8 @@ body.loaded #intro-name {
   top: 24%;
   left: 10%;
   color: #aaa;
-  font-size: 2em;
   transform: translate(0, -25px);
+  font-size: 2em;
   opacity: 0;
   transition: transform 1.15s ease-in-out, opacity 3s ease-out;
 }

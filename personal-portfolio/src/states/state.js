@@ -14,13 +14,11 @@ export class State {
         this.mode = mode;
     }
 
-    initialize() {
-    }
-    
-    update(deltaTime) {
-    }
+    initialize() {}
+    update(deltaTime, camera) {}
+    shutdown() {}
 
-    shutdown() {
-        
-    }
+    // Events
+    onMouseClick(event, camera) {}
+    onMouseMove(event, camera) {}
 }

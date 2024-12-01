@@ -1,7 +1,5 @@
 import * as THREE from 'three';
 import { remove } from 'three/examples/jsm/libs/tween.module.js';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
 
 export class SceneManager {
     static _instance;

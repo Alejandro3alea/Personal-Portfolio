@@ -10,11 +10,13 @@ class PortfolioApp {
   constructor() {
     this._SM = SceneManager.getInstance();
     this.clock = new THREE.Clock();
+    this.currentState = undefined;
 
     this.initializeRenderer();
     this.initializeCamera();
 
     this.changeState(new InitScreenState());
+    this.setWindowEvents();
 
     //this.loadSkybox();
     this.update();
@@ -59,14 +61,34 @@ class PortfolioApp {
     this.currentState.initialize();
   }
   
+  setWindowEvents() {
+    window.addEventListener('click', (event) => { 
+      this.currentState.onMouseClick(event, this.camera); 
+    }, false);
+
+    window.addEventListener('mousemove', (event) => { 
+      this.currentState.onMouseMove(event, this.camera); 
+    }, false);
+
+    window.addEventListener('resize', () => { 
+      this.onWindowResize(); 
+    }, false);
+  }
+
   update()
   {
     requestAnimationFrame(() => this.update());
 
     const deltaTime = this.clock.getDelta();
-    this.currentState.update(deltaTime);
+    this.currentState.update(deltaTime, this.camera);
 
     this.renderer.render(SceneManager.getInstance().getScene(), this.camera);
+  }
+
+  onWindowResize() {
+    this.camera.aspect = window.innerWidth / window.innerHeight;
+    this.camera.updateProjectionMatrix();
+    this.renderer.setSize(window.innerWidth, window.innerHeight);
   }
 }
 
