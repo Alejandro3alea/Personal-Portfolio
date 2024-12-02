@@ -1,5 +1,4 @@
 import * as THREE from 'three';
-import { remove } from 'three/examples/jsm/libs/tween.module.js';
 
 export class SceneManager {
     static _instance;
@@ -34,7 +33,11 @@ export class SceneManager {
     }
 
     deleteNode(name) {
-        const nodeToDelete = this.scene.getObjectByName(name);
+        const nodeToDelete = this.getNode(name);
         this.scene.remove(nodeToDelete);
+    }
+
+    getNode(name) {
+        return this.scene.getObjectByName(name);
     }
 }

@@ -1,6 +1,7 @@
 
 export const StateMode = {
-    INIT_SCREEN: "initScreen",
+    INTRO_SCREEN: "introScreen",
+    TRANSITION_FROM_INTRO: "transitionFromIntro",
     MAIN_MENU: "mainMenu",
     ABOUT_ME: "aboutMe",
     PROJECTS: "projects",

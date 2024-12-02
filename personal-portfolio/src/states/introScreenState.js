@@ -2,42 +2,48 @@ import { State, StateMode } from './state.js';
 import { ResourceLoaders } from '../resourceLoaders.js';
 import { SceneManager } from '../sceneManager.js';
 import { ParticleSystem } from '../particleSystem.js';
+import { EaseInOut } from '../math/easing.js';
 
 import * as THREE from 'three';
+import { clamp } from 'three/src/math/MathUtils.js';
+import { StateManager } from './stateManager.js';
+import { TransitionFromIntroState } from './transitionFromIntro.js';
 
-export class InitScreenState extends State {
+export class IntroScreenState extends State {
     constructor() {
-        super(StateMode.INIT_SCREEN);
+        super(StateMode.INTRO_SCREEN);
         
         this.rotatingNodes = new Array();
+        this.interactableNodes = new Array();
         this.rotation = new THREE.Vector3();
 
         this.rotationPhase = 0;
-        this.rotationFrequency = 0.5; // Frequency of speed oscillations
+        this.rotationFrequency = 0.5;
 
         this.raycaster = new THREE.Raycaster();
         this.mouse = new THREE.Vector2();
 
         this.boxParticles = new ParticleSystem("boxParticles", 10000);
+        
+        this.lidScaleTimer = 0.0;
     }
 
     initialize() {
-        this.loadModels();
-        this.createCommonShapes();
-        this.addLighting();
+        this._loadModels();
+        this._createCommonShapes();
+        this._addLighting();
     }
 
     update(deltaTime, camera) {
-        this.updateRotatingNodes(deltaTime);
-        this.updateRaycasterIntersections(camera);
+        this.__updateRotatingNodes(deltaTime);
+        this.__updateRaycasterIntersections(camera);
+        this.__updateInteractableNode(deltaTime);
         this.boxParticles.updateParticles(deltaTime);
     }
 
     onMouseClick(event, camera) {
-        this.raycaster.setFromCamera(this.mouse, camera);
-
         if (this.intersects.length > 0) {
-            this.intersects[0].object.material.color.set(0xff0000);
+            this.__startTransition();
         }
     }
 
@@ -47,7 +53,7 @@ export class InitScreenState extends State {
         this.mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
     }
     
-    loadModels() {
+    _loadModels() {
         const loadModel = (path, name, pos, size, onLoadCallback) => {
         ResourceLoaders.GLTFLoader().load(path, 
             (gltf) => {
@@ -74,26 +80,27 @@ export class InitScreenState extends State {
             "cornellBox", 
             cornellPos, 
             cornellSize, 
-            (model) => {this.addNodeToRotatingList(model);});
+            (model) => {this.__addNodeToRotatingList(model);});
     }
 
-    createCommonShapes() {
+    _createCommonShapes() {
         const testTexture = ResourceLoaders.TextureLoader().load('test.png');
         const icosaGeo = new THREE.SphereGeometry(10, 4, 2);
         const icosaMaterial = new THREE.MeshStandardMaterial({ color: 0xFFFFFF, map: testTexture });
         const icosaMesh = new THREE.Mesh(icosaGeo, icosaMaterial);
         icosaMesh.castShadow = true;
         icosaMesh.receiveShadow = true;
-        //this._SM.addNode("icosaMesh", icosaMesh);
+        //SceneManager.getInstance().addNode("icosaMesh", icosaMesh);
 
         const cornellLidGeo = new THREE.BoxGeometry(20.5, 20.5, 20.5);
         const cornellLidMaterial = new THREE.MeshStandardMaterial({ color: 0xFFFFFF, metalness: 0.7, roughness: 0.0 });
         const cornellLidMesh = new THREE.Mesh(cornellLidGeo, cornellLidMaterial);
-        this.addNodeToRotatingList(cornellLidMesh);
+        this.__addNodeToRotatingList(cornellLidMesh);
+        this.interactableNodes.push(cornellLidMesh);
         SceneManager.getInstance().addNode("cornellLid", cornellLidMesh);
     }
     
-    addLighting() {
+    _addLighting() {
         const pointLight = new THREE.PointLight(0xFFFFDD, 250, 2000);
         pointLight.position.set(0, 9, 0);
         pointLight.castShadow = true;
@@ -103,11 +110,11 @@ export class InitScreenState extends State {
         SceneManager.getInstance().addNode("bgLight", bgLight);
     }
 
-    addNodeToRotatingList(node) {
+    __addNodeToRotatingList(node) {
         this.rotatingNodes.push(node);
     }
 
-    updateRotatingNodes(deltaTime) {
+    __updateRotatingNodes(deltaTime) {
         const rotationSpeed = {
             x: 0.3, 
             y: 0.5, 
@@ -134,18 +141,45 @@ export class InitScreenState extends State {
         });
     }
 
-    updateRaycasterIntersections(camera) {
+    __updateRaycasterIntersections(camera) {
         this.raycaster.setFromCamera(this.mouse, camera);
 
         this.intersects = this.raycaster.intersectObjects(this.rotatingNodes);
+        // This only updates when moving the cursor :/
         if (this.intersects.length > 0) {
-            console.log(this.intersects);
+
             document.body.style.cursor = 'pointer';
         } else {
             document.body.style.cursor = 'auto';
         }
     }
 
-    startTransition() {
+    __updateInteractableNode(deltaTime) {
+        if (this.intersects.length > 0) {
+            this.lidScaleTimer += deltaTime * 2;
+        }
+        else {
+            this.lidScaleTimer -= deltaTime * 2;
+        }
+        this.lidScaleTimer = clamp(this.lidScaleTimer, 0.0, 1.0);
+
+        const easeVal = EaseInOut(1, 1.2, this.lidScaleTimer);
+        this.interactableNodes.forEach((node) => {
+            node.scale.x = easeVal;
+            node.scale.y = easeVal;
+            node.scale.z = easeVal;
+        });
+    }
+
+    __startTransition() {
+        let introNameText = document.querySelector("#intro-name");
+        let introRoleText = document.querySelector("#intro-role");
+
+        introNameText.style.transition = "transform 1s ease-in, opacity 0.5s ease-out";
+        introRoleText.style.transition = "transform 1s ease-out, opacity 0.5s ease-out";
+        introNameText.classList.add("hidden");
+        introRoleText.classList.add("hidden");
+
+        StateManager.getInstance().changeState(new TransitionFromIntroState());
     }
 }

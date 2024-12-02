@@ -23,6 +23,10 @@ body {
   transition: transform 1s ease-out, opacity 2s ease-out;
 }
 
+.hidden {
+  opacity: 0 !important;
+}
+
 body.loaded #intro-name {
   transform: translate(0, 0);
   opacity: 1;

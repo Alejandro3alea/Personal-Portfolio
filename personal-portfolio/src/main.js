@@ -1,22 +1,21 @@
-import javascriptLogo from '../javascript.svg'
-
 import { SceneManager } from './sceneManager.js';
+import { StateManager } from './states/stateManager.js';
 
 import * as THREE from 'three';
 
-import { InitScreenState } from './states/initScreenState.js';
-
 class PortfolioApp {
   constructor() {
-    this._SM = SceneManager.getInstance();
+    this._SceneMgr = SceneManager.getInstance();
+    this._StateMgr = StateManager.getInstance();
+    
     this.clock = new THREE.Clock();
     this.currentState = undefined;
 
     this.initializeRenderer();
     this.initializeCamera();
-
-    this.changeState(new InitScreenState());
     this.setWindowEvents();
+
+    this._StateMgr.initialize(this.camera);
 
     //this.loadSkybox();
     this.update();
@@ -43,33 +42,20 @@ class PortfolioApp {
     this.camera.position.setZ(35);
     this.camera.position.setX(-15);
 
-    this.renderer.render(this._SM.getScene(), this.camera);
+    this.renderer.render(this._SceneMgr.getScene(), this.camera);
   }
 
   loadSkybox() {
     this.textureLoader.load('Crab Nebula/hdr.png', (texture) => {
       texture.mapping = THREE.EquirectangularReflectionMapping;
-      this._SM.getScene().background = texture;
-      this._SM.getScene().environment = texture;
+      this._SceneMgr.getScene().background = texture;
+      this._SceneMgr.getScene().environment = texture;
     }, undefined, (error) => {
       console.error(error);
     });
   }
-
-  changeState(state) {
-    this.currentState = state;
-    this.currentState.initialize();
-  }
   
   setWindowEvents() {
-    window.addEventListener('click', (event) => { 
-      this.currentState.onMouseClick(event, this.camera); 
-    }, false);
-
-    window.addEventListener('mousemove', (event) => { 
-      this.currentState.onMouseMove(event, this.camera); 
-    }, false);
-
     window.addEventListener('resize', () => { 
       this.onWindowResize(); 
     }, false);
@@ -80,7 +66,7 @@ class PortfolioApp {
     requestAnimationFrame(() => this.update());
 
     const deltaTime = this.clock.getDelta();
-    this.currentState.update(deltaTime, this.camera);
+    this._StateMgr.update(deltaTime);
 
     this.renderer.render(SceneManager.getInstance().getScene(), this.camera);
   }
