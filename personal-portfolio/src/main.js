@@ -1,5 +1,6 @@
 import { SceneManager } from './sceneManager.js';
 import { StateManager } from './states/stateManager.js';
+import { ParticleSystemManager } from './particles/particleSystemManager.js';
 
 import * as THREE from 'three';
 
@@ -7,6 +8,7 @@ class PortfolioApp {
   constructor() {
     this._SceneMgr = SceneManager.getInstance();
     this._StateMgr = StateManager.getInstance();
+    this._PSMgr = ParticleSystemManager.getInstance();
     
     this.clock = new THREE.Clock();
     this.currentState = undefined;
@@ -67,6 +69,7 @@ class PortfolioApp {
 
     const deltaTime = this.clock.getDelta();
     this._StateMgr.update(deltaTime);
+    this._PSMgr.update(deltaTime);
 
     this.renderer.render(SceneManager.getInstance().getScene(), this.camera);
   }

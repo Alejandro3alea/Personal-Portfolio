@@ -1,5 +1,6 @@
-import { SceneManager } from "./sceneManager.js";
+import { SceneManager } from "../sceneManager.js";
 import * as THREE from 'three';
+import { ParticleSystemManager } from "./particleSystemManager.js";
 
 export class ParticleSystem {
     constructor(name, particleCount) {
@@ -10,8 +11,9 @@ export class ParticleSystem {
         this.opacities = new Float32Array(this.particleCount);
         this.velocities = new Array(this.particleCount);
         this.lifetimes = new Float32Array(this.particleCount);
+        this.activated = true;
 
-        this.initializeParticles(name);
+        ParticleSystemManager.getInstance().addParticleSystem(name, this);
     }
 
     initializeParticles(name) {
@@ -58,9 +60,18 @@ export class ParticleSystem {
     }
 
     resetParticle(index) {
-        this.positions[index * 3] = (Math.random() - 0.5) * this.boxSize + 5;
-        this.positions[index * 3 + 1] = (Math.random() - 0.5) * this.boxSize;
-        this.positions[index * 3 + 2] = (Math.random() - 0.5) * this.boxSize - 5;
+        if (this.activated) {
+            this.positions[index * 3] = (Math.random() - 0.5) * this.boxSize + 5;
+            this.positions[index * 3 + 1] = (Math.random() - 0.5) * this.boxSize;
+            this.positions[index * 3 + 2] = (Math.random() - 0.5) * this.boxSize - 5;
+        }
+        else {
+            const OOB = 100000.0;
+            this.positions[index * 3] = OOB;
+            this.positions[index * 3 + 1] = OOB;
+            this.positions[index * 3 + 2] = OOB;
+        }
+
 
         const angle = Math.random() * Math.PI * 2;
         const speed = Math.random() * 5 + 2.5;

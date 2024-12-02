@@ -1,7 +1,7 @@
 import { State, StateMode } from './state.js';
 import { ResourceLoaders } from '../resourceLoaders.js';
 import { SceneManager } from '../sceneManager.js';
-import { ParticleSystem } from '../particleSystem.js';
+import { ParticleSystem } from '../particles/particleSystem.js';
 import { Lerp } from '../math/easing.js';
 
 import * as THREE from 'three';
@@ -16,8 +16,6 @@ export class TransitionFromIntroState extends State {
         this.cornellBox = SceneManager.getInstance().getNode("cornellBox");
         this.cornellLid = SceneManager.getInstance().getNode("cornellLid");
         this.boxParticles = SceneManager.getInstance().getNode("boxParticles");
-        
-        console.log(this.cornellLid.scale);
     }
 
     initialize() {
@@ -44,6 +42,9 @@ export class TransitionFromIntroState extends State {
         this.cornellLid.scale.x = updatedLidScale;
         this.cornellLid.scale.y = updatedLidScale;
         this.cornellLid.scale.z = updatedLidScale;
+
+        // @TODO: Maybe create a particle system manager?
+
     }
 
     __endTransition() {

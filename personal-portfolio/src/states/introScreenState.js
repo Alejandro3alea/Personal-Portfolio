@@ -1,7 +1,7 @@
 import { State, StateMode } from './state.js';
 import { ResourceLoaders } from '../resourceLoaders.js';
 import { SceneManager } from '../sceneManager.js';
-import { ParticleSystem } from '../particleSystem.js';
+import { ParticleSystem } from '../particles/particleSystem.js';
 import { EaseInOut } from '../math/easing.js';
 
 import * as THREE from 'three';
@@ -38,7 +38,6 @@ export class IntroScreenState extends State {
         this.__updateRotatingNodes(deltaTime);
         this.__updateRaycasterIntersections(camera);
         this.__updateInteractableNode(deltaTime);
-        this.boxParticles.updateParticles(deltaTime);
     }
 
     onMouseClick(event, camera) {
@@ -50,7 +49,10 @@ export class IntroScreenState extends State {
     onMouseMove(event, camera) {
         // Mouse pos to NDC (-1,+1)
         this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-        this.mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
+        this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+        
+        camera.position.x += (-15 + this.mouse.x * 1.5 - camera.position.x) * 0.05;
+        camera.position.y += (this.mouse.y * 1.5 - camera.position.y) * 0.05;
     }
     
     _loadModels() {
@@ -179,6 +181,8 @@ export class IntroScreenState extends State {
         introRoleText.style.transition = "transform 1s ease-out, opacity 0.5s ease-out";
         introNameText.classList.add("hidden");
         introRoleText.classList.add("hidden");
+
+        this.boxParticles.activated = false;
 
         StateManager.getInstance().changeState(new TransitionFromIntroState());
     }
