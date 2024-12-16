@@ -55,3 +55,8 @@ export function EaseInOutBack(lhs, rhs, tVal) {
         return Lerp(lhs, rhs, easeT);
     }
 }
+
+export function QuadraticBounce(lhs, rhs, tVal) {
+    const easeT = -4.0 * tVal * tVal + 4.0 * tVal;
+    return Lerp(lhs, rhs, easeT);
+}

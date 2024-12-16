@@ -1,0 +1,11 @@
+Model Information:
+* title:	Low Poly Laptop
+* source:	https://sketchfab.com/3d-models/low-poly-laptop-646d3c0318f9451a8e4fce2798072aa6
+* author:	pythonreaper (https://sketchfab.com/minasianjoey)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Low Poly Laptop" (https://sketchfab.com/3d-models/low-poly-laptop-646d3c0318f9451a8e4fce2798072aa6) by pythonreaper (https://sketchfab.com/minasianjoey) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

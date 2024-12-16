@@ -68,8 +68,8 @@ class PortfolioApp {
     requestAnimationFrame(() => this.update());
 
     const deltaTime = this.clock.getDelta();
-    this._StateMgr.update(deltaTime);
-    this._PSMgr.update(deltaTime);
+    this._StateMgr.update(deltaTime*5);
+    this._PSMgr.update(deltaTime*5);
 
     this.renderer.render(SceneManager.getInstance().getScene(), this.camera);
   }

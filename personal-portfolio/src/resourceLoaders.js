@@ -33,6 +33,17 @@ export class ResourceLoaders {
         return ResourceLoaders.getInstance().hdriLoader;
     }
 
+    static LoadTexture(path, callback) {
+        return ResourceLoaders.TextureLoader().load(
+            path,
+            callback,
+            undefined,
+            (error) => {
+                console.error('Error loading ' + path + ':', error);
+            }
+        );
+    }
+
     initializeLoaders() {
         this.gltfLoader = new GLTFLoader();
         this.textureLoader = new THREE.TextureLoader();

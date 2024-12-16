@@ -2,12 +2,13 @@ import { State, StateMode } from './state.js';
 import { ResourceLoaders } from '../resourceLoaders.js';
 import { SceneManager } from '../sceneManager.js';
 import { ParticleSystem } from '../particles/particleSystem.js';
-import { EaseInOut } from '../math/easing.js';
+import { EaseInOut, QuadraticBounce } from '../math/easing.js';
 
 import * as THREE from 'three';
 import { clamp } from 'three/src/math/MathUtils.js';
 import { StateManager } from './stateManager.js';
 import { TransitionFromIntroState } from './transitionFromIntro.js';
+import { cornellLidFragShader, cornellLidVertexShader } from '../../data/shaders/cornellLidShader.js';
 
 export class IntroScreenState extends State {
     constructor() {
@@ -23,9 +24,29 @@ export class IntroScreenState extends State {
         this.raycaster = new THREE.Raycaster();
         this.mouse = new THREE.Vector2();
 
-        this.boxParticles = new ParticleSystem("boxParticles", 10000);
-        
+        this.texturesArray = new Array();
+        this.textureArrayIndex = 0;
+        this.lidTextureTransitionVal = 0.0;
         this.lidScaleTimer = 0.0;
+
+        this.boxParticles = new ParticleSystem("boxParticles", 10000);
+
+        this.cornellLidMaterial = new THREE.ShaderMaterial({
+            vertexShader: cornellLidVertexShader,
+            fragmentShader: cornellLidFragShader,
+            uniforms: {
+              envMap: { value: null },
+              texture1: { value: null },
+              texture2: { value: null },
+              mixRatio: { value: 0.0 },
+              time: { value: 0.0 },
+              refractionRatio: { value: 0.98 },
+              fresnelPower: { value: 5.0 },
+              glossiness: { value: 8.0 },
+              emissiveColor: { value: new THREE.Color(0x444444) } // Example emissive color
+            },
+            transparent: false,
+        });
     }
 
     initialize() {
@@ -37,7 +58,7 @@ export class IntroScreenState extends State {
     update(deltaTime, camera) {
         this.__updateRotatingNodes(deltaTime);
         this.__updateRaycasterIntersections(camera);
-        this.__updateInteractableNode(deltaTime);
+        this.__updateCornellLid(deltaTime);
     }
 
     onMouseClick(event, camera) {
@@ -53,6 +74,8 @@ export class IntroScreenState extends State {
         
         camera.position.x += (-15 + this.mouse.x * 1.5 - camera.position.x) * 0.05;
         camera.position.y += (this.mouse.y * 1.5 - camera.position.y) * 0.05;
+
+        camera.lookAt(new THREE.Vector3(-15, 0, 0));
     }
     
     _loadModels() {
@@ -95,8 +118,40 @@ export class IntroScreenState extends State {
         //SceneManager.getInstance().addNode("icosaMesh", icosaMesh);
 
         const cornellLidGeo = new THREE.BoxGeometry(20.5, 20.5, 20.5);
-        const cornellLidMaterial = new THREE.MeshStandardMaterial({ color: 0xFFFFFF, metalness: 0.7, roughness: 0.0 });
-        const cornellLidMesh = new THREE.Mesh(cornellLidGeo, cornellLidMaterial);
+        
+        ResourceLoaders.LoadTexture('Projects_CPURaytracer.png', (texture) => {
+            this.cornellLidMaterial.uniforms.texture1.value = texture;
+            this.cornellLidMaterial.needsUpdate = true;
+            this.texturesArray.push(texture);
+        });
+
+        ResourceLoaders.LoadTexture('AI_CircuitGenerator.jpg', (texture) => {
+            this.cornellLidMaterial.uniforms.texture2.value = texture;
+            this.cornellLidMaterial.needsUpdate = true;
+            this.texturesArray.push(texture);
+        });
+        
+        ResourceLoaders.LoadTexture('Projects_DeferredShading.jpg', (texture) => {
+            this.cornellLidMaterial.uniforms.texture2.value = texture;
+            this.cornellLidMaterial.needsUpdate = true;
+            this.texturesArray.push(texture);
+        });
+        
+        ResourceLoaders.LoadTexture('Projects_HyperTwist0.png', (texture) => {
+            this.cornellLidMaterial.uniforms.texture2.value = texture;
+            this.cornellLidMaterial.needsUpdate = true;
+            this.texturesArray.push(texture);
+        });
+        
+        ResourceLoaders.LoadTexture('Crab Nebula/hdr.png', (texture) => {
+            texture.mapping = THREE.EquirectangularReflectionMapping;
+            SceneManager.getInstance().getScene().background = texture;
+            SceneManager.getInstance().getScene().environment = texture;
+            this.cornellLidMaterial.uniforms.envMap.value = texture.clone();
+            this.cornellLidMaterial.needsUpdate = true;
+        });
+        
+        const cornellLidMesh = new THREE.Mesh(cornellLidGeo, this.cornellLidMaterial);
         this.__addNodeToRotatingList(cornellLidMesh);
         this.interactableNodes.push(cornellLidMesh);
         SceneManager.getInstance().addNode("cornellLid", cornellLidMesh);
@@ -108,8 +163,14 @@ export class IntroScreenState extends State {
         pointLight.castShadow = true;
         SceneManager.getInstance().addNode("pointLight", pointLight);
         
-        const bgLight = new THREE.AmbientLight(0xFFFFFF);
-        SceneManager.getInstance().addNode("bgLight", bgLight);
+        const directionalLight = new THREE.DirectionalLight(0xFFFFFF, 1);
+        directionalLight.position.set(50, 50, 50);
+        directionalLight.castShadow = true;
+        directionalLight.shadow.mapSize.width = 1024;
+        directionalLight.shadow.mapSize.height = 1024;
+        directionalLight.shadow.camera.near = 0.5;
+        directionalLight.shadow.camera.far = 500;
+        SceneManager.getInstance().addNode("directionalLight", directionalLight);
     }
 
     __addNodeToRotatingList(node) {
@@ -156,7 +217,7 @@ export class IntroScreenState extends State {
         }
     }
 
-    __updateInteractableNode(deltaTime) {
+    __updateCornellLid(deltaTime) {
         if (this.intersects.length > 0) {
             this.lidScaleTimer += deltaTime * 2;
         }
@@ -171,6 +232,28 @@ export class IntroScreenState extends State {
             node.scale.y = easeVal;
             node.scale.z = easeVal;
         });
+
+        this.__updateCornellLidTexture(deltaTime);
+    }
+
+    __updateCornellLidTexture(deltaTime) {
+        //this.cornellLidMaterial.uniforms.value = texture;
+
+        this.lidTextureTransitionVal += deltaTime / 5.0;
+        if (this.lidTextureTransitionVal >= 1.0)
+        {
+            this.lidTextureTransitionVal = 0.0;
+            this.textureArrayIndex++;
+
+            if (this.textureArrayIndex == this.texturesArray.length - 1) {
+                this.textureArrayIndex = 0;
+            }
+        }
+        
+        this.cornellLidMaterial.uniforms.texture1.value = this.texturesArray[this.textureArrayIndex];
+        this.cornellLidMaterial.uniforms.texture2.value = this.texturesArray[this.textureArrayIndex + 1];
+        this.cornellLidMaterial.uniforms.mixRatio.value = this.lidTextureTransitionVal;
+        this.cornellLidMaterial.needsUpdate = true;
     }
 
     __startTransition() {
@@ -182,6 +265,7 @@ export class IntroScreenState extends State {
         introNameText.classList.add("hidden");
         introRoleText.classList.add("hidden");
 
+        document.body.style.cursor = 'auto';
         this.boxParticles.activated = false;
 
         StateManager.getInstance().changeState(new TransitionFromIntroState());
